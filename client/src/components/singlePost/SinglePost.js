@@ -1,44 +1,108 @@
-import React from 'react';
-import './singlePost.css'
+import React, { useEffect, useState, useContext } from 'react';
+import './singlePost.css';
+import { useLocation } from 'react-router';
+import axios from 'axios';
+import { Link } from 'react-router-dom';
+import { Context } from "../../context/Context";
 
+//location.pathname.split("/")[2] finds the post id
 export default function SinglePost() {
+    const location = useLocation();
+    const path = location.pathname.split("/")[2];
+    const [post, setPost] = useState({});
+    const PF = "http://localhost:5000/images/";
+    const { user } = useContext(Context);
+    const [title, setTitle] = useState("");
+    const [desc, setDesc] = useState("");
+    const [updateMode, setUpdateMode] = useState(false);
+
+
+    useEffect(() => {
+        const getPost = async () => {
+            const res = await axios.get("/posts/" + path);
+            setPost(res.data);
+            setTitle(res.data.title);
+            setDesc(res.data.desc);
+        };
+        getPost();
+    }, [path])
+
+    const handleDelete = async ()=> {
+        try {
+            await axios.delete(`/posts/${post._id}`, {
+                data:{ username: user.username }
+            })
+            window.location.replace("/");
+        } catch(err) {}
+    };
+
+    const handleUpdate = async ()=> {
+        try {
+            await axios.put(`/posts/${post._id}` , {
+                username: user.username,
+                title,
+                desc,
+            });
+            setUpdateMode(false)
+        } catch(err) {}
+    }
     return (
         <div className="singlePost">
-            <div className="singlePostWrapper">
-                <img src="https://picsum.photos/id/1025/600/400" alt="dog in blanket" className="singlePostImg" />
-                <h1 className="singlePostTitle">Green juice waistcoat brooklyn quinoa dreamcatcher.
-                    <div className="singlePostEdit">
-                        <i className="singlePostIcon far fa-edit"></i>
-                        <i className="singlePostIcon far fa-trash-alt"></i>
-                    </div>
-                </h1>
-                <div className="singlePostInfo">
-                    <span className="singlePostAuthor">Author: <b>Tracy</b></span>
-                    <span className="singlePostDate">1 hour ago</span>
-                </div>
-                <p className="singlePostDesc">Glossier raw denim raclette poutine shoreditch. Cronut bushwick knausgaard, 
-                    tousled fanny pack hell of selfies tumblr narwhal tofu pork belly occupy 
-                    farm-to-table. La croix semiotics chia, live-edge 8-bit vape DIY before 
-                    they sold out leggings. Tote bag franzen godard YOLO locavore, af try-hard 
-                    pork belly tousled. Succulents cray swag wolf. Gluten-free williamsburg man 
-                    bun put a bird on it man braid thundercats DIY banh mi, tilde seitan wolf 
-                    beard bushwick slow-carb franzen. PBR&B keffiyeh slow-carb hoodie, raw 
-                    denim bicycle rights cronut cardigan vegan.
-                    Distillery leggings schlitz next level lo-fi. Wayfarers mixtape DIY live-edge paleo lumbersexual 
-                    street art ennui art party wolf hella meggings neutra banh mi. Locavore mixtape migas tacos four 
-                    dollar toast neutra lo-fi VHS tousled cray flexitarian af. Seitan wolf selvage, 90's you probably 
-                    haven't heard of them poke pok pok pop-up shoreditch gochujang chillwave tousled sustainable messenger 
-                    bag. Tattooed hell of man bun, synth bitters butcher marfa kombucha fashion axe umami.
-                    Roof party put a bird on it fixie kickstarter kinfolk chillwave, hexagon pug pok pok selvage edison 
-                    bulb mumblecore vinyl. Mixtape small batch knausgaard, XOXO selfies art party marfa subway tile 
-                    chicharrones austin listicle. Blue bottle you probably haven't heard of them plaid, church-key 
-                    iceland food truck street art vape gastropub bicycle rights marfa. Cold-pressed taxidermy banjo 
-                    iceland bitters. Butcher lumbersexual lo-fi, aesthetic bicycle rights actually direct trade roof 
-                    party artisan. Master cleanse PBR&B man braid kitsch, shaman seitan fixie helvetica affogato jean 
-                    shorts subway tile viral chicharrones. Fashion axe schlitz chicharrones, pinterest tilde vape 
-                    asymmetrical listicle man braid craft beer biodiesel shabby chic heirloom.
-                </p>
+          <div className="singlePostWrapper">
+            {post.photo && (
+              <img src={PF + post.photo} alt="" className="singlePostImg" />
+            )}
+            {updateMode ? (
+              <input
+                type="text"
+                value={title}
+                className="singlePostTitleInput"
+                autoFocus
+                onChange={(e) => setTitle(e.target.value)}
+              />
+            ) : (
+              <h1 className="singlePostTitle">
+                {title}
+                {post.username === user.username && (
+                  <div className="singlePostEdit">
+                    <i
+                      className="singlePostIcon far fa-edit"
+                      onClick={() => setUpdateMode(true)}
+                    ></i>
+                    <i
+                      className="singlePostIcon far fa-trash-alt"
+                      onClick={handleDelete}
+                    ></i>
+                  </div>
+                )}
+              </h1>
+            )}
+            <div className="singlePostInfo">
+              <span className="singlePostAuthor">
+                Author:
+                <Link to={`/?user=${post.username}`} className="link">
+                  <b> {post.username}</b>
+                </Link>
+              </span>
+              <span className="singlePostDate">
+                {new Date(post.createdAt).toDateString()}
+              </span>
             </div>
+            {updateMode ? (
+              <textarea
+                className="singlePostDescInput"
+                value={desc}
+                onChange={(e) => setDesc(e.target.value)}
+              />
+            ) : (
+              <p className="singlePostDesc">{desc}</p>
+            )}
+            {updateMode && (
+              <button className="singlePostButton" onClick={handleUpdate}>
+                Update
+              </button>
+            )}
+          </div>
         </div>
-    )
-}
+      );
+    }

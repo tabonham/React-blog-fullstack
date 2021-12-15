@@ -1,33 +1,32 @@
 import React from 'react';
 import './post.css'
+import { Link } from 'react-router-dom';
 
-export default function Post() {
+//c = category
+//PF = public folder
+export default function Post({post}) {
+    const PF = "http://localhost:5000/images/"
     return (
         <div className="post">
-            <img className="postImg" src="https://picsum.photos/id/1/500/300"alt="laptop" />
+            {post.photo && (
+            <img className="postImg" src={PF + post.photo}
+            alt="" />
+            )}
             <div className="postInfo">
                 <div className="postCats">
-                    <span className="postCat">Music</span>
-                    <span className="postCat">Life</span>
+                    {post.categories.map((c) => (
+                    <span className="postCat">{c.name}</span>
+                    ))}
                 </div>
-                <span className="postTitle">
-                Readymade hella art party intelligentsia
-                </span>
+                <Link to={`/post/${post._id}`} className="link">
+                    <span className="postTitle">
+                    {post.title}
+                    </span>
+                </Link>
                 <hr/>
-                <span className="postDate">1 hour ago</span>
+                <span className="postDate">{new Date(post.createdAt).toDateString()}</span>
             </div>
-            <p className="postDesc">I'm baby pitchfork microdosing plaid organic salvia flexitarian 
-                before they sold out fanny pack banh mi. Listicle direct trade 
-                hoodie gentrify tattooed next level pop-up yr. Leggings prism 
-                kitsch hexagon, shoreditch edison bulb seitan biodiesel truffaut 
-                forage artisan roof party mlkshk health goth freegan. Distillery 
-                narwhal vegan chicharrones four dollar toast butcher succulents 
-                enamel pin cornhole bespoke lomo health goth before they sold out. 
-                Banh mi tousled subway tile single-origin coffee, poutine snackwave 
-                umami cronut health goth pitchfork keffiyeh kickstarter pour-over 
-                man braid. Freegan ugh narwhal tattooed PBR&B copper mug air plant. 
-                kled shoreditch hella man braid, tbh pok pok fanny pack franzen 
-                sartorial.</p>
+            <p className="postDesc">{post.desc}</p>
         </div>
     )
 }

@@ -1,8 +1,8 @@
-import React from 'react'
+import React, { useContext } from 'react';
 import Topbar from './components/topbar/Topbar';
 import Write from './pages/write/Write';
 import Single from './pages/single/Single';
-import Home from './pages/home/Home'
+import Home from './pages/home/Home';
 import Settings from './pages/settings/Settings';
 import Login from './pages/login/Login';
 import Register from './pages/register/Register';
@@ -11,19 +11,20 @@ import {
   Routes,
   Route
 } from "react-router-dom";
+import { Context } from './context/Context';
 
 function App() {
-  const currentUser = false;
+  const { user } = useContext(Context);
   return (
     <BrowserRouter>
       <Topbar />
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/register" element={currentUser ? <Home /> : <Register /> } />
+        <Route path="/register" element={user ? <Home /> : <Register /> } />
 
-        <Route path="/login" element={currentUser ? <Home /> : <Login />} />
-        <Route path="/write" element={currentUser ? <Write /> : <Login />} />
-        <Route path="/settings" element={currentUser ? <Settings /> : <Login />} />
+        <Route path="/login" element={user ? <Home /> : <Login />} />
+        <Route path="/write" element={user ? <Write /> : <Login />} />
+        <Route path="/settings" element={user ? <Settings /> : <Login />} />
         <Route path="/post/:postId" element={<Single />} />
       </Routes>
     </BrowserRouter>
